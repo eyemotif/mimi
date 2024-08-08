@@ -12,4 +12,8 @@ fn main() {
             return;
         }
     };
+
+    println!("{:?}", state.file);
+
+    init::deinit(state).expect("Deinit should return successfully");
 }
