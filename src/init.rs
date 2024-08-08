@@ -1,6 +1,6 @@
 use crate::cli::Args;
 use crate::state::{State, Terminal};
-use crossterm::{execute, terminal};
+use crossterm::{cursor, execute, terminal};
 use std::io::{Read, Result};
 
 pub fn init(args: &Args) -> Result<State> {
@@ -29,7 +29,8 @@ fn init_terminal() -> Result<Terminal> {
     execute!(
         terminal.backend_mut(),
         terminal::EnterAlternateScreen,
-        terminal::Clear(terminal::ClearType::All)
+        terminal::Clear(terminal::ClearType::All),
+        cursor::MoveTo(0, 0),
     )?;
 
     Ok(terminal)
