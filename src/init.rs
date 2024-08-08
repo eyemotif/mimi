@@ -3,19 +3,21 @@ use crate::state::{State, Terminal};
 use crossterm::{cursor, execute, terminal};
 use std::io::{Read, Result};
 
-pub fn init(args: &Args) -> Result<State> {
+pub fn init(args: &Args) -> Result<(State, Terminal)> {
     let (file, is_readonly) = read_file(&args.file)?;
     let terminal = init_terminal()?;
 
-    Ok(State {
-        file,
-        is_readonly: is_readonly || args.readonly,
+    Ok((
+        State {
+            file,
+            is_readonly: is_readonly || args.readonly,
+        },
         terminal,
-    })
+    ))
 }
-pub fn deinit(mut state: State) -> std::io::Result<()> {
+pub fn deinit(mut terminal: Terminal) -> std::io::Result<()> {
     terminal::disable_raw_mode()?;
-    execute!(state.terminal.backend_mut(), terminal::LeaveAlternateScreen)?;
+    execute!(terminal.backend_mut(), terminal::LeaveAlternateScreen)?;
 
     Ok(())
 }

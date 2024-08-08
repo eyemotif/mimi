@@ -1,6 +1,5 @@
-use std::io::Write;
-
 mod cli;
+mod draw;
 mod init;
 mod input;
 mod state;
@@ -8,7 +7,7 @@ mod state;
 fn main() {
     let args = <cli::Args as clap::Parser>::parse();
 
-    let mut state = match init::init(&args) {
+    let (mut state, mut terminal) = match init::init(&args) {
         Ok(it) => it,
         Err(err) => {
             eprintln!("Error initializing: {err}");
@@ -16,17 +15,26 @@ fn main() {
         }
     };
 
-    println!("Text");
-
     loop {
+        match terminal.draw(|frame| draw::draw(frame, &state)) {
+            Ok(_) => (),
+            Err(err) => {
+                eprintln!("Error drawing frame: {err}");
+                break;
+            }
+        }
+
         match input::handle_input(&mut state) {
             Ok(event) => match event {
                 input::InputEvent::NoOp => (),
                 input::InputEvent::Exit => break,
             },
-            Err(err) => eprintln!("Error reading key: {err}"),
+            Err(err) => {
+                eprintln!("Error reading key: {err}");
+                break;
+            }
         }
     }
 
-    init::deinit(state).expect("Deinit should return successfully");
+    init::deinit(terminal).expect("Deinit should return successfully");
 }
