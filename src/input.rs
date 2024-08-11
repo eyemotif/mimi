@@ -35,7 +35,7 @@ fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputE
             }
         }
         KeyCode::Down => {
-            let (col, _) = state.get_cursor_position();
+            let (col, _) = state.position_in_file(state.cursor);
 
             let mut col_in_new_line = None;
             for c in state.file.chars().skip(state.cursor) {
@@ -60,7 +60,7 @@ fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputE
         }
         KeyCode::Up => {
             // TODO: up arrow input
-            let (_col, row) = state.get_cursor_position();
+            let (_col, row) = state.position_in_file(state.cursor);
 
             if row == 0 {
                 state.cursor = 0;

@@ -14,7 +14,7 @@ pub fn draw(frame: &mut ratatui::Frame, state: &mut State) {
     let (message, message_type) = if let Some(message) = state.message_queue.pop_front() {
         message
     } else {
-        let (col, line) = state.get_cursor_position();
+        let (col, line) = state.position_in_file(state.cursor);
         (
             format!("({col}, {line})"),
             crate::state::MessageType::Status,
