@@ -84,15 +84,24 @@ fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputE
 
 fn handle_ctrl_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputEvent {
     match key.code {
-        KeyCode::Char('s') => match std::fs::write(&state.file_path, &state.file) {
-            Ok(()) => state.enqueue_message(
-                format!("Saved! (Wrote {} bytes)", state.file.len()),
-                MessageType::Status,
-            ),
-            Err(err) => {
-                state.enqueue_message(format!("Failed to save file: {err}"), MessageType::Danger);
+        KeyCode::Char('s') => {
+            if state.is_readonly {
+                state.enqueue_message("File is readonly!".to_owned(), MessageType::Danger);
+                return InputEvent::NoOp;
             }
-        },
+            match std::fs::write(&state.file_path, &state.file) {
+                Ok(()) => state.enqueue_message(
+                    format!("Saved! (Wrote {} bytes)", state.file.len()),
+                    MessageType::Status,
+                ),
+                Err(err) => {
+                    state.enqueue_message(
+                        format!("Failed to save file: {err}"),
+                        MessageType::Danger,
+                    );
+                }
+            }
+        }
         KeyCode::Char(' ') => {
             state.enqueue_message("open command palette!".to_owned(), MessageType::Info);
         }
