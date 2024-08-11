@@ -10,6 +10,7 @@ pub fn init(args: &Args) -> Result<(State, Terminal)> {
     Ok((
         State {
             file,
+            file_path: args.file.clone(),
             is_readonly: is_readonly || args.readonly,
             cursor: 0,
             message_queue: std::collections::VecDeque::new(),

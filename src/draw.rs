@@ -24,7 +24,7 @@ pub fn draw(frame: &mut ratatui::Frame, state: &mut State) {
         message,
         match message_type {
             crate::state::MessageType::Status => Style::new(),
-            crate::state::MessageType::Warn => Style::new().fg(Color::White).bg(Color::Yellow),
+            crate::state::MessageType::Info => Style::new().fg(Color::White).bg(Color::Blue),
             crate::state::MessageType::Danger => Style::new().fg(Color::White).bg(Color::Red),
         },
     );

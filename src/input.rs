@@ -1,4 +1,4 @@
-use crate::state::State;
+use crate::state::{MessageType, State};
 use crossterm::event::{Event, KeyCode};
 
 pub enum InputEvent {
@@ -15,6 +15,13 @@ pub fn handle_input(state: &mut State) -> std::io::Result<InputEvent> {
 }
 
 fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputEvent {
+    if key
+        .modifiers
+        .contains(crossterm::event::KeyModifiers::CONTROL)
+    {
+        return handle_ctrl_keypress(key, state);
+    }
+
     match key.code {
         KeyCode::Esc => return InputEvent::Exit,
         KeyCode::Left => {
@@ -53,7 +60,7 @@ fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputE
         }
         KeyCode::Up => {
             // TODO: up arrow input
-            let (col, row) = state.get_cursor_position();
+            let (_col, row) = state.get_cursor_position();
 
             if row == 0 {
                 state.cursor = 0;
@@ -72,5 +79,25 @@ fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputE
         }
         _ => (),
     }
+    InputEvent::NoOp
+}
+
+fn handle_ctrl_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputEvent {
+    match key.code {
+        KeyCode::Char('s') => match std::fs::write(&state.file_path, &state.file) {
+            Ok(()) => state.enqueue_message(
+                format!("Saved! (Wrote {} bytes)", state.file.len()),
+                MessageType::Status,
+            ),
+            Err(err) => {
+                state.enqueue_message(format!("Failed to save file: {err}"), MessageType::Danger);
+            }
+        },
+        KeyCode::Char(' ') => {
+            state.enqueue_message("open command palette!".to_owned(), MessageType::Info);
+        }
+        _ => (),
+    }
+
     InputEvent::NoOp
 }
