@@ -6,20 +6,19 @@ pub struct State {
     pub is_readonly: bool,
     pub cursor: usize,
 }
+impl State {
+    pub fn get_cursor_position(&self) -> (usize, usize) {
+        let mut col = 0;
+        let mut line = 0;
+        for c in self.file.chars().take(self.cursor) {
+            if c == '\n' {
+                col = 0;
+                line += 1;
+            } else {
+                col += 1;
+            }
+        }
 
-// impl State {
-//     pub fn get_cursor_position(&self) -> (usize, usize) {
-//         let mut line = 0;
-//         let mut col = 0;
-//         for c in self.file.chars().take(self.cursor + 1) {
-//             if c == '\r' || c == '\n' {
-//                 col = 0;
-//                 line += 1;
-//             } else {
-//                 col += 1;
-//             }
-//         }
-
-//         (line, col)
-//     }
-// }
+        (col, line)
+    }
+}
