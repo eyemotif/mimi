@@ -11,6 +11,7 @@ pub fn init(args: &Args) -> Result<(State, Terminal)> {
         State {
             file,
             is_readonly: is_readonly || args.readonly,
+            cursor: 0,
         },
         terminal,
     ))
