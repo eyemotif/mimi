@@ -16,7 +16,10 @@ pub fn draw(frame: &mut ratatui::Frame, state: &mut State) {
     } else {
         let (col, line) = state.position_in_file(state.cursor);
         (
-            format!("({col}, {line})"),
+            format!(
+                "({col}, {line}){}",
+                if state.is_readonly { " readonly" } else { "" }
+            ),
             crate::state::MessageType::Status,
         )
     };
