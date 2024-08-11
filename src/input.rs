@@ -27,6 +27,16 @@ fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputE
                 state.cursor += 1;
             }
         }
+        KeyCode::Char(c) => {
+            state.file.insert(state.cursor, c);
+            state.cursor += 1;
+        }
+        KeyCode::Backspace => {
+            if state.cursor > 0 {
+                state.file.remove(state.cursor);
+                state.cursor -= 1;
+            }
+        }
         _ => (),
     }
     InputEvent::NoOp
