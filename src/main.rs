@@ -16,7 +16,7 @@ fn main() {
     };
 
     loop {
-        match terminal.draw(|frame| draw::draw(frame, &state)) {
+        match terminal.draw(|frame| draw::draw(frame, &mut state)) {
             Ok(_) => (),
             Err(err) => {
                 eprintln!("Error drawing frame: {err}");

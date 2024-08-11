@@ -12,6 +12,7 @@ pub fn init(args: &Args) -> Result<(State, Terminal)> {
             file,
             is_readonly: is_readonly || args.readonly,
             cursor: 0,
+            message_queue: std::collections::VecDeque::new(),
         },
         terminal,
     ))
