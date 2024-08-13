@@ -14,6 +14,7 @@ pub fn init(args: &Args) -> Result<(State, Terminal)> {
             is_readonly: is_readonly || args.readonly,
             cursor: 0,
             message_queue: std::collections::VecDeque::new(),
+            scroll_lines: 0,
         },
         terminal,
     ))
@@ -35,7 +36,7 @@ fn init_terminal() -> Result<Terminal> {
         terminal.backend_mut(),
         terminal::EnterAlternateScreen,
         terminal::Clear(terminal::ClearType::All),
-        cursor::MoveTo(0, 0),
+        // cursor::MoveTo(0, 0),
     )?;
 
     Ok(terminal)

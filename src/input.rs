@@ -8,10 +8,12 @@ pub enum InputEvent {
 
 pub fn handle_input(state: &mut State) -> std::io::Result<InputEvent> {
     match crossterm::event::read()? {
-        Event::Key(key) => Ok(handle_keypress(key, state)),
+        Event::Key(key) => return Ok(handle_keypress(key, state)),
         Event::Mouse(_) => todo!(),
-        _ => Ok(InputEvent::NoOp),
+        _ => (),
     }
+
+    Ok(InputEvent::NoOp)
 }
 
 fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputEvent {
@@ -35,7 +37,7 @@ fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputE
             }
         }
         KeyCode::Down => {
-            let (col, _) = state.position_in_file(state.cursor);
+            let (col, row) = state.position_in_file(state.cursor);
 
             let mut col_in_new_line = None;
             for c in state.file.chars().skip(state.cursor) {

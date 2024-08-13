@@ -9,6 +9,7 @@ pub struct State {
     pub is_readonly: bool,
     pub cursor: usize,
     pub message_queue: VecDeque<(String, MessageType)>,
+    pub scroll_lines: usize,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -19,6 +20,16 @@ pub enum MessageType {
 }
 
 impl State {
+    pub fn scrolled_file(&self) -> &str {
+        let scroll_index = self.index_of_line(self.scroll_lines);
+        let scroll_byte_index = self
+            .file
+            .char_indices()
+            .nth(scroll_index)
+            .expect("scroll byte index")
+            .0;
+        &self.file[scroll_byte_index..]
+    }
     pub fn enqueue_message(&mut self, message: String, message_type: MessageType) {
         self.message_queue.push_back((message, message_type));
     }
@@ -36,18 +47,18 @@ impl State {
 
         (col, line)
     }
-    // pub fn index_of_line(&self, line: usize) -> usize {
-    //     let mut current_line = 0;
-    //     for (i, c) in self.file.chars().enumerate() {
-    //         if current_line == line {
-    //             return i;
-    //         }
+    pub fn index_of_line(&self, line: usize) -> usize {
+        let mut current_line = 0;
+        for (i, c) in self.file.chars().enumerate() {
+            if current_line == line {
+                return i;
+            }
 
-    //         if c == '\n' {
-    //             current_line += 1;
-    //         }
-    //     }
+            if c == '\n' {
+                current_line += 1;
+            }
+        }
 
-    //     self.file.chars().count()
-    // }
+        self.file.chars().count()
+    }
 }
