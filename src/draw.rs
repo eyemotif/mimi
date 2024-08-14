@@ -65,16 +65,10 @@ fn update_scroll(state: &mut State, area_height: u16) {
 }
 
 fn calculate_cursor_pos(state: &mut State, frame_width: u16) -> (u16, u16) {
-    // TODO: account for scroll
-    let mut col = 0;
-    let mut row = 0;
+    let mut col: u16 = 0;
+    let mut row: usize = 0;
 
-    for c in state
-        .file
-        .chars()
-        .skip(state.index_of_line(state.scroll_lines))
-        .take(state.cursor)
-    {
+    for c in state.file.chars().take(state.cursor) {
         if c == '\n' {
             row += 1;
             col = 0;
@@ -87,5 +81,8 @@ fn calculate_cursor_pos(state: &mut State, frame_width: u16) -> (u16, u16) {
         }
     }
 
-    (col, row)
+    (
+        col,
+        (row - state.scroll_lines).try_into().unwrap_or(u16::MAX),
+    )
 }
