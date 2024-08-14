@@ -15,6 +15,7 @@ pub fn init(args: &Args) -> Result<(State, Terminal)> {
             cursor: 0,
             message_queue: std::collections::VecDeque::new(),
             scroll_lines: 0,
+            history: crate::history::History::new(),
         },
         terminal,
     ))

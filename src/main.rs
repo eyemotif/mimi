@@ -3,6 +3,7 @@ mod draw;
 mod init;
 mod input;
 mod state;
+mod history;
 
 fn main() {
     let args = <cli::Args as clap::Parser>::parse();

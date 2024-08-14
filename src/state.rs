@@ -10,6 +10,7 @@ pub struct State {
     pub cursor: usize,
     pub message_queue: VecDeque<(String, MessageType)>,
     pub scroll_lines: usize,
+    pub history: crate::history::History,
 }
 
 #[derive(Debug, Clone, Copy)]

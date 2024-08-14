@@ -25,7 +25,12 @@ fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputE
     }
 
     match key.code {
-        KeyCode::Esc => return InputEvent::Exit,
+        KeyCode::Esc => {
+            if state.history.edited_since_last_save() {
+                return InputEvent::Exit;
+            }
+            state.enqueue_message("Not saved since last edit!".to_owned(), MessageType::Danger);
+        }
         KeyCode::Left => {
             if state.cursor > 0 {
                 state.cursor -= 1;
@@ -71,10 +76,13 @@ fn handle_ctrl_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> I
                 return InputEvent::NoOp;
             }
             match std::fs::write(&state.file_path, &state.file) {
-                Ok(()) => state.enqueue_message(
-                    format!("Saved! (Wrote {} bytes)", state.file.len()),
-                    MessageType::Status,
-                ),
+                Ok(()) => {
+                    state.history.save();
+                    state.enqueue_message(
+                        format!("Saved! (Wrote {} bytes)", state.file.len()),
+                        MessageType::Status,
+                    );
+                }
                 Err(err) => {
                     state.enqueue_message(
                         format!("Failed to save file: {err}"),
@@ -85,6 +93,12 @@ fn handle_ctrl_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> I
         }
         KeyCode::Char(' ') => {
             state.enqueue_message("open command palette!".to_owned(), MessageType::Info);
+        }
+        KeyCode::Char('r') => {
+            state.history.undo(&mut state.file, &mut state.cursor);
+        }
+        KeyCode::Char('y') => {
+            state.history.redo(&mut state.file, &mut state.cursor);
         }
         _ => (),
     }
