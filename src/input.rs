@@ -26,7 +26,7 @@ fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputE
 
     match key.code {
         KeyCode::Esc => {
-            if state.history.edited_since_last_save() {
+            if !state.history.edited_since_last_save() {
                 return InputEvent::Exit;
             }
             state.enqueue_message("Not saved since last edit!".to_owned(), MessageType::Danger);
@@ -55,12 +55,21 @@ fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputE
         }
         KeyCode::Char(c) => {
             state.file.insert(state.cursor, c);
+            state.history.edit_add(c, state.cursor);
             state.cursor += 1;
         }
         KeyCode::Backspace => {
             if state.cursor > 0 {
                 state.cursor -= 1;
-                state.file.remove(state.cursor);
+                let c = state.file.remove(
+                    state
+                        .file
+                        .char_indices()
+                        .nth(state.cursor)
+                        .expect("char to remove should exist")
+                        .0,
+                );
+                state.history.edit_del(c, state.cursor);
             }
         }
         _ => (),
@@ -94,10 +103,14 @@ fn handle_ctrl_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> I
         KeyCode::Char(' ') => {
             state.enqueue_message("open command palette!".to_owned(), MessageType::Info);
         }
-        KeyCode::Char('r') => {
+        KeyCode::Char('z') => {
+            state.enqueue_message("undo".to_owned(), MessageType::Info);
+
             state.history.undo(&mut state.file, &mut state.cursor);
         }
         KeyCode::Char('y') => {
+            state.enqueue_message("undo".to_owned(), MessageType::Info);
+
             state.history.redo(&mut state.file, &mut state.cursor);
         }
         _ => (),

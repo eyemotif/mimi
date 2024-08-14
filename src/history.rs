@@ -11,6 +11,16 @@ enum Edit {
     Delete(String),
 }
 
+fn index_to_byte(index: usize, in_text: &str) -> usize {
+    for (char_index, (byte_index, _)) in in_text.char_indices().enumerate() {
+        if char_index == index {
+            return byte_index;
+        }
+    }
+
+    in_text.len()
+}
+
 impl History {
     fn push_edit(&mut self, edit: Edit, at_index: usize) {
         for _ in 0..self.undo_offset {
@@ -46,7 +56,7 @@ impl History {
         }
 
         let position_in_last_edit = *last_edit_index + last_edit_text.chars().count() - at_index;
-        last_edit_text.insert(position_in_last_edit, add);
+        last_edit_text.insert(index_to_byte(position_in_last_edit, last_edit_text), add);
         if position_in_last_edit == 0 {
             *last_edit_index -= 1;
         }
@@ -70,14 +80,14 @@ impl History {
         }
 
         let position_in_last_edit = *last_edit_index + last_edit_text.chars().count() - at_index;
-        last_edit_text.insert(position_in_last_edit, del);
+        last_edit_text.insert(index_to_byte(position_in_last_edit, last_edit_text), del);
         if position_in_last_edit == 0 {
             *last_edit_index -= 1;
         }
     }
 
     pub fn undo(&mut self, file: &mut String, cursor: &mut usize) {
-        if self.undo_offset >= self.edits.len() - 1 {
+        if self.undo_offset >= self.edits.len() {
             return;
         }
 
@@ -87,12 +97,12 @@ impl History {
         match edit {
             Edit::Add(text) => {
                 for _ in text.chars() {
-                    file.remove(*index);
+                    file.remove(index_to_byte(*index, file));
                 }
                 *cursor = *index;
             }
             Edit::Delete(text) => {
-                file.insert_str(*index, text);
+                file.insert_str(index_to_byte(*index, file), text);
                 *cursor = *index + text.chars().count();
             }
         }
@@ -107,12 +117,12 @@ impl History {
 
         match edit {
             Edit::Add(text) => {
-                file.insert_str(*index, text);
+                file.insert_str(index_to_byte(*index, file), text);
                 *cursor = *index + text.chars().count();
             }
             Edit::Delete(text) => {
                 for _ in text.chars() {
-                    file.remove(*index);
+                    file.remove(index_to_byte(*index, file));
                 }
                 *cursor = *index;
             }
@@ -120,9 +130,9 @@ impl History {
     }
 
     pub fn save(&mut self) {
-        self.save_index = self.edits.len().saturating_sub(1);
+        self.save_index = self.edits.len() - self.undo_offset;
     }
     pub fn edited_since_last_save(&self) -> bool {
-        self.save_index != self.edits.len() - 1 - self.undo_offset
+        self.save_index != self.edits.len() - self.undo_offset
     }
 }
