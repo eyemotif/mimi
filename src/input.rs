@@ -32,7 +32,7 @@ fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputE
             }
         }
         KeyCode::Right => {
-            if state.cursor < state.file.chars().count() - 1 {
+            if state.cursor < state.file.chars().count() {
                 state.cursor += 1;
             }
         }
@@ -54,8 +54,8 @@ fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputE
         }
         KeyCode::Backspace => {
             if state.cursor > 0 {
-                state.file.remove(state.cursor);
                 state.cursor -= 1;
+                state.file.remove(state.cursor);
             }
         }
         _ => (),

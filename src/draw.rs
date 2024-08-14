@@ -1,7 +1,7 @@
 use crate::state::State;
 use ratatui::layout::{Constraint, Layout};
 use ratatui::style::{Color, Style};
-use ratatui::text::{self, Line};
+use ratatui::text::Line;
 use ratatui::widgets::Paragraph;
 
 pub fn draw(frame: &mut ratatui::Frame, state: &mut State) {
@@ -47,7 +47,7 @@ fn update_scroll(state: &mut State, area_height: u16) {
     let first_visible_index = state.index_of_line(first_visible_line);
 
     let last_visible_line = first_visible_line + usize::from(area_height) - 1;
-    let last_visible_line = last_visible_line.min(state.file.split('\n').count());
+    let last_visible_line = last_visible_line.min(state.file.split('\n').count() - 1);
     let last_visible_index = state.index_of_line(last_visible_line)
         + state
             .file
