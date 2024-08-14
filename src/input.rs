@@ -37,36 +37,15 @@ fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputE
             }
         }
         KeyCode::Down => {
-            let (col, row) = state.position_in_file(state.cursor);
+            let (col, line) = state.position_in_file(state.cursor);
 
-            let mut col_in_new_line = None;
-            for c in state.file.chars().skip(state.cursor) {
-                state.cursor += 1;
-                if c == '\n' {
-                    if col_in_new_line.is_some() {
-                        state.cursor -= 1;
-                        break;
-                    }
-                    col_in_new_line = Some(0);
-                    continue;
-                }
-
-                if let Some(col_in_new_line) = col_in_new_line.as_mut() {
-                    if *col_in_new_line == col {
-                        state.cursor -= 1;
-                        break;
-                    }
-                    *col_in_new_line += 1;
-                }
-            }
+            state.cursor = state.index_in_file(col, line + 1);
         }
         KeyCode::Up => {
-            // TODO: up arrow input
-            let (_col, row) = state.position_in_file(state.cursor);
+            let (col, line) = state.position_in_file(state.cursor);
 
-            if row == 0 {
-                state.cursor = 0;
-                return InputEvent::NoOp;
+            if line > 0 {
+                state.cursor = state.index_in_file(col, line - 1);
             }
         }
         KeyCode::Char(c) => {

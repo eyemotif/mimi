@@ -47,6 +47,27 @@ impl State {
 
         (col, line)
     }
+    pub fn index_in_file(&self, col: usize, line: usize) -> usize {
+        let mut current_col = 0;
+        let mut current_line = 0;
+
+        for (index, c) in self.file.chars().enumerate() {
+            if c == '\n' {
+                if current_col <= col && current_line == line {
+                    return index;
+                }
+                current_col = 0;
+                current_line += 1;
+            } else {
+                if current_col == col && current_line == line {
+                    return index;
+                }
+                current_col += 1;
+            }
+        }
+
+        self.file.chars().count()
+    }
     pub fn index_of_line(&self, line: usize) -> usize {
         let mut current_line = 0;
         for (i, c) in self.file.chars().enumerate() {
