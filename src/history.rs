@@ -5,8 +5,8 @@ pub struct History {
     save_index: usize,
 }
 
-#[derive(Debug)]
-enum Edit {
+#[derive(Debug, Clone)]
+pub enum Edit {
     Add(String),
     Delete(String),
 }
@@ -48,14 +48,16 @@ impl History {
             return;
         };
 
-        if at_index < *last_edit_index - 1
+        if last_edit_index.saturating_sub(at_index) >= 2
             || at_index > *last_edit_index + last_edit_text.chars().count()
         {
             self.push_edit(Edit::Add(add.to_string()), at_index);
             return;
         }
 
-        let position_in_last_edit = *last_edit_index + last_edit_text.chars().count() - at_index;
+        // ab+c|d
+
+        let position_in_last_edit = at_index - *last_edit_index;
         last_edit_text.insert(index_to_byte(position_in_last_edit, last_edit_text), add);
         if position_in_last_edit == 0 {
             *last_edit_index -= 1;
@@ -86,9 +88,9 @@ impl History {
         }
     }
 
-    pub fn undo(&mut self, file: &mut String, cursor: &mut usize) {
+    pub fn undo(&mut self, file: &mut String, cursor: &mut usize) -> Option<Edit> {
         if self.undo_offset >= self.edits.len() {
-            return;
+            return None;
         }
 
         self.undo_offset += 1;
@@ -106,10 +108,12 @@ impl History {
                 *cursor = *index + text.chars().count();
             }
         }
+
+        Some(edit.clone())
     }
-    pub fn redo(&mut self, file: &mut String, cursor: &mut usize) {
+    pub fn redo(&mut self, file: &mut String, cursor: &mut usize) -> Option<Edit> {
         if self.undo_offset == 0 {
-            return;
+            return None;
         }
 
         self.undo_offset -= 1;
@@ -127,6 +131,8 @@ impl History {
                 *cursor = *index;
             }
         }
+
+        Some(edit.clone())
     }
 
     pub fn save(&mut self) {
@@ -134,5 +140,14 @@ impl History {
     }
     pub fn edited_since_last_save(&self) -> bool {
         self.save_index != self.edits.len() - self.undo_offset
+    }
+}
+
+impl std::fmt::Display for Edit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Edit::Add(text) => f.write_fmt(format_args!("Add {text:?}")),
+            Edit::Delete(text) => f.write_fmt(format_args!("Delete {text:?}")),
+        }
     }
 }

@@ -104,14 +104,18 @@ fn handle_ctrl_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> I
             state.enqueue_message("open command palette!".to_owned(), MessageType::Info);
         }
         KeyCode::Char('z') => {
-            state.enqueue_message("undo".to_owned(), MessageType::Info);
+            let edit = state.history.undo(&mut state.file, &mut state.cursor);
 
-            state.history.undo(&mut state.file, &mut state.cursor);
+            if let Some(edit) = edit {
+                state.enqueue_message(format!("Undo {edit}"), MessageType::Status);
+            }
         }
         KeyCode::Char('y') => {
-            state.enqueue_message("undo".to_owned(), MessageType::Info);
+            let edit = state.history.redo(&mut state.file, &mut state.cursor);
 
-            state.history.redo(&mut state.file, &mut state.cursor);
+            if let Some(edit) = edit {
+                state.enqueue_message(format!("Redo {edit}"), MessageType::Status);
+            }
         }
         _ => (),
     }
