@@ -54,7 +54,13 @@ fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputE
             }
         }
         KeyCode::Char(c) => {
-            state.file.insert(state.cursor, c);
+            let byte_index = state
+                .file
+                .char_indices()
+                .nth(state.cursor)
+                .expect("char should exist")
+                .0;
+            state.file.insert(byte_index, c);
             state.history.edit_add(c, state.cursor);
             state.cursor += 1;
         }
@@ -72,6 +78,7 @@ fn handle_keypress(key: crossterm::event::KeyEvent, state: &mut State) -> InputE
                 state.history.edit_del(c, state.cursor);
             }
         }
+        KeyCode::Enter => return handle_keypress(KeyCode::Char('\n').into(), state),
         _ => (),
     }
     InputEvent::NoOp

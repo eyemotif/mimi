@@ -55,8 +55,6 @@ impl History {
             return;
         }
 
-        // ab+c|d
-
         let position_in_last_edit = at_index - *last_edit_index;
         last_edit_text.insert(index_to_byte(position_in_last_edit, last_edit_text), add);
         if position_in_last_edit == 0 {
